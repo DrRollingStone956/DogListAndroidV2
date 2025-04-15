@@ -18,7 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.verticalcoding.mystudentlist.ui.theme.MyStudentListTheme
+import com.verticalcoding.mystudentlist.ui.theme.MyDogListTheme
 
 
 @Composable
@@ -143,7 +143,7 @@ fun getRandomName(): String {
 @Preview(showBackground = true)
 @Composable
 fun GreetingColumnPreview() {
-    MyStudentListTheme {
+    MyDogListTheme {
         GreetingColumn("Android", onNameChange = { name ->
             print(name)
         })
@@ -154,7 +154,7 @@ fun GreetingColumnPreview() {
 @Preview(showBackground = true)
 @Composable
 fun GreetingRowPreview() {
-    MyStudentListTheme {
+    MyDogListTheme {
         GreetingRow("Android", onNameChange = { name ->
             print(name)
         })
@@ -164,7 +164,7 @@ fun GreetingRowPreview() {
 @Preview(showBackground = true)
 @Composable
 fun GreetingBoxPreview() {
-    MyStudentListTheme {
+    MyDogListTheme {
         GreetingBox("Android", onNameChange = { name ->
             print(name)
         })

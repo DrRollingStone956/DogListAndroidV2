@@ -3,7 +3,10 @@ package com.verticalcoding.mystudentlist.model
 import kotlinx.serialization.Serializable
 
 @Serializable
-object StudentList
+object DogList
 
 @Serializable
-data class StudentScreen(val name: String)
+data class DogDetailsScreen(val name: String)
+
+@Serializable
+class DogCreate

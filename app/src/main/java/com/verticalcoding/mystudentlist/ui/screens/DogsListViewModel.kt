@@ -1,4 +1,4 @@
-package com.verticalcoding.mystudentlist.ui.screens.StudentDetails
+package com.verticalcoding.mystudentlist.ui.screens
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -9,13 +9,13 @@ import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.AP
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.verticalcoding.mystudentlist.StudentsListApplication
+import com.verticalcoding.mystudentlist.DogsListApplication
 import com.verticalcoding.mystudentlist.data.DogsPhotosRepository
 import com.verticalcoding.mystudentlist.model.DogPhoto
+import com.verticalcoding.mystudentlist.ui.screens.DogDetails.DogDetailsViewModel
 import kotlinx.coroutines.launch
 
-class StudentDetailsViewModel(
-    private val dogsPhotosRepository: DogsPhotosRepository
+class DogsListViewModel(private val dogsPhotosRepository: DogsPhotosRepository
 ) : ViewModel() {
 
     sealed interface UiState {
@@ -45,11 +45,10 @@ class StudentDetailsViewModel(
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
-                val application = (this[APPLICATION_KEY] as StudentsListApplication)
+                val application = (this[APPLICATION_KEY] as DogsListApplication)
                 val dogsPhotosRepository = application.container.dogsPhotosRepository
-                StudentDetailsViewModel(dogsPhotosRepository)
+                DogDetailsViewModel(dogsPhotosRepository)
             }
         }
     }
 }
-
