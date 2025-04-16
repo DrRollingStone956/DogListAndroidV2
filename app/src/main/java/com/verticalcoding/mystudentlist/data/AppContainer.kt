@@ -1,6 +1,10 @@
 package com.verticalcoding.mystudentlist.data
 
+import android.content.Context
+import androidx.room.Room
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import com.verticalcoding.mystudentlist.data.local.database.AppDatabase
+import com.verticalcoding.mystudentlist.data.local.database.DogEntityDao
 import com.verticalcoding.mystudentlist.data.network.DogsService
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
@@ -8,10 +12,11 @@ import retrofit2.Retrofit
 
 // Main dependency injection container
 interface AppContainer {
-    val dogsPhotosRepository: DogsPhotosRepository
+    val dogsPhotosRepository: DogsRepository
+    val dogDao: DogEntityDao
 }
 
-class DefaultAppContainer : AppContainer {
+class DefaultAppContainer(context: Context) : AppContainer {
     private val dogsApiBaseUrl = "https://dog.ceo/api/breeds/"
 
     private val retrofit: Retrofit = Retrofit.Builder()
@@ -23,7 +28,15 @@ class DefaultAppContainer : AppContainer {
         retrofit.create(DogsService::class.java)
     }
 
-    override val dogsPhotosRepository: DogsPhotosRepository by lazy {
-        NetworkDogsPhotosRepository(dogsService)
+    private val database: AppDatabase by lazy {
+        Room.databaseBuilder(context, AppDatabase::class.java, "app_database").build()
+    }
+
+    override val dogDao: DogEntityDao by lazy {
+        database.dogDao()
+    }
+
+    override val dogsPhotosRepository: DogsRepository by lazy {
+        DefaultDogsRepository(dogsService, dogDao)
     }
 }

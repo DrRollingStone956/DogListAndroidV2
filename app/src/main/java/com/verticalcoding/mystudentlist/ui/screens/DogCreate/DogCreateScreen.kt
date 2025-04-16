@@ -36,17 +36,15 @@ import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
+import com.verticalcoding.mystudentlist.ui.screens.DogsListViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DogCreateScreen(
-    addDog: (String) -> Unit,
-    dogs: List<String>,
     uiState: DogCreateViewModel.UiState,
     retryAction: () -> Unit,
     navController: NavController
 ) {
-    var doglist by remember { mutableStateOf(dogs) }
     var dogname by remember { mutableStateOf("") }
     var breed by remember { mutableStateOf("") }
     Scaffold(
@@ -82,7 +80,7 @@ fun DogCreateScreen(
                 onValueChange = { breed = it },
                 modifier = Modifier.fillMaxWidth().padding(bottom = 40.dp).padding(horizontal = 32.dp)
             )
-            Button(onClick = { addDog(dogname) ;navController.popBackStack() }, modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp))
+            Button(onClick = { ;navController.popBackStack() }, modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp))
             {
                 Text(text = "Add", fontSize = 20.sp, textAlign = TextAlign.Center)
             }

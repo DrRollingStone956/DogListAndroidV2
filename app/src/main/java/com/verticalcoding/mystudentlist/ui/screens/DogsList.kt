@@ -19,6 +19,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Warning
@@ -34,35 +36,59 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
-import com.verticalcoding.mystudentlist.model.DogCreate
+import com.verticalcoding.mystudentlist.data.DogsRepository
+import com.verticalcoding.mystudentlist.model.Dog
 import com.verticalcoding.mystudentlist.model.DogDetailsScreen
+import com.verticalcoding.mystudentlist.model.DogScreen
 
+@Composable
+fun DogsScreen(
+    viewModel: DogsListViewModel,
+    navigationController: NavController
+) {
+    val items by viewModel.uiState.collectAsStateWithLifecycle()
+    if (items is DogsListViewModel.UiState.Success) {
+        DogsList(
+            name = viewModel.name.value,
+            dogs = (items as DogsListViewModel.UiState.Success).data,
+            navController = navigationController,
+            onNameChange = { viewModel.name.value = it},
+            onSave = viewModel::addDog,
+            onFav = viewModel::triggerFav,
+            onTrash = viewModel::removeDog
+        )
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DogsList(
     name: String,
-    //breed: String,
-
-    dogs: List<String>,
+    dogs: List<Dog>,
     navController: NavController,
-    uiState: DogsListViewModel.UiState,
-    retryAction: () -> Unit,
-    onNameChange: (String) -> Unit,
-    //onBreedChange: (String) -> Unit,
-    onDeleteDog: (String) -> Unit
+    onNameChange: (name: String) -> Unit,
+    onSave: (name: String) -> Unit,
+    onFav: (id:Int) -> Unit,
+    onTrash: (id:Int) -> Unit
 ) {
-    // liked dogs
     Scaffold(
         topBar = {
             TopAppBar(
@@ -87,7 +113,6 @@ fun DogsList(
             )
         }
     ){
-
         innerPadding ->
         Column(
             modifier = Modifier
@@ -103,14 +128,12 @@ fun DogsList(
                     value = name,
                     onValueChange = { onNameChange(it) }
                 )
-                //OutlinedTextField(
-                //    value = breed,
-                 //   onValueChange = { onBreedChange(it) }
-                //)
+
                 OutlinedButton(
+                    enabled = name.isNotEmpty() && name.length > 3,
                     onClick = {
-                        navController.navigate(DogCreate())
-                }) {
+                        onSave(name)
+                    }) {
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = null
@@ -122,27 +145,53 @@ fun DogsList(
                 modifier = Modifier
                     .padding(top=16.dp)
             ) {
-                Log.d("DogsList", "Dogs: $dogs")
-                items(dogs.toList()) { dogName ->
+                items(dogs) { dog ->
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp, horizontal = 16.dp)
                             .clickable {
-                                navController.navigate(DogDetailsScreen(dogName))
+                                navController.navigate(DogScreen(dog.name))
                             }
                     ) {
-                        ContentScreen(uiState, retryAction)
                         Text(
-                            text = dogName,
+                            text = dog.name,
                             fontWeight = FontWeight.SemiBold
                         )
 
                         Spacer(Modifier.weight(1f))
 
+                        val brush = Brush.linearGradient(
+                            colors = listOf(
+                                Color(0xFF6A5ACD), // Purple
+                                Color(0xFFFFC0CB)  // Pink
+                            ),
+                            start = Offset(0f, 0f),
+                            end = Offset(50f, 100f)
+                        )
+
+                        IconButton(
+                            onClick = {
+                                onFav(dog.id)
+                            }
+                        ) {
+                            Icon(
+                                modifier = Modifier
+                                    .graphicsLayer(alpha = 0.99f)
+                                    .drawWithCache {
+                                        onDrawWithContent {
+                                            drawContent()
+                                            drawRect(brush, blendMode = BlendMode.SrcAtop)
+                                        }
+                                    },
+                                imageVector = if (dog.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                contentDescription = null,
+                            )
+                        }
+
                         IconButton(onClick = {
-                            onDeleteDog(dogName)
+                            onTrash(dog.id)
                         }) {
                             Icon(
                                 imageVector = Icons.Default.Delete,
@@ -151,54 +200,6 @@ fun DogsList(
                     }
                 }
             }
-        }
-    }
-}
-@Composable
-fun ContentScreen(uiState: DogsListViewModel.UiState, retryAction: () -> Unit, modifier: Modifier = Modifier) {
-    when(uiState) {
-        is DogsListViewModel.UiState.Loading -> LoadingScreen(
-            modifier = modifier
-        )
-        is DogsListViewModel.UiState.Error -> ErrorScreen(
-            retryAction = retryAction, modifier = modifier
-        )
-        is DogsListViewModel.UiState.Success -> {
-            AsyncImage(
-                modifier = Modifier.fillMaxWidth().padding(32.dp).height(300.dp),
-                model = ImageRequest.Builder(context = LocalContext.current)
-                    .data(uiState.photo.message)
-                    .crossfade(true)
-                    .build(),
-                contentDescription = null
-            )
-        }
-
-    }
-}
-
-@Composable
-fun LoadingScreen(modifier: Modifier = Modifier) {
-    CircularProgressIndicator(
-        modifier = Modifier.width(64.dp),
-        color = MaterialTheme.colorScheme.secondary,
-        trackColor = MaterialTheme.colorScheme.surfaceVariant,
-    )
-}
-
-@Composable
-fun ErrorScreen(retryAction: () -> Unit, modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Image(
-            imageVector = Icons.Default.Warning, contentDescription = ""
-        )
-        Text(text = "Failed", modifier = Modifier.padding(16.dp))
-        Button(onClick = retryAction) {
-            Image(imageVector = Icons.Default.Refresh, contentDescription = null)
         }
     }
 }

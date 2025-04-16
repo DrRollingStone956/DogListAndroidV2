@@ -10,12 +10,12 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.verticalcoding.mystudentlist.DogsListApplication
-import com.verticalcoding.mystudentlist.data.DogsPhotosRepository
+import com.verticalcoding.mystudentlist.data.DogsRepository
 import com.verticalcoding.mystudentlist.model.DogPhoto
 import kotlinx.coroutines.launch
 
 class DogCreateViewModel(
-    private val dogsPhotosRepository: DogsPhotosRepository
+    private val dogsPhotosRepository: DogsRepository
 ) : ViewModel() {
 
     sealed interface UiState {

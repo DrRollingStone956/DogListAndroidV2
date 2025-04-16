@@ -9,4 +9,7 @@ object DogList
 data class DogDetailsScreen(val name: String)
 
 @Serializable
+data class DogScreen(val name: String)
+
+@Serializable
 class DogCreate
