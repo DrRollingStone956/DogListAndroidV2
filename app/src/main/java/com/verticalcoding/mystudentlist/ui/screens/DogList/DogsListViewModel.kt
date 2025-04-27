@@ -1,7 +1,10 @@
-package com.verticalcoding.mystudentlist.ui.screens
+package com.verticalcoding.mystudentlist.ui.screens.DogList
 
 
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
@@ -28,20 +31,29 @@ class DogsListViewModel(
         data class Success(val data: List<Dog>): UiState
     }
 
-    val name = mutableStateOf("Reksio")
+    var searchText by mutableStateOf(TextFieldValue(""))
+        private set
+
+    fun onSearchTextChange(newValue: TextFieldValue) {
+        searchText = newValue
+    }
+    fun getFilteredDogs(dogList: List<Dog>): List<Dog> {
+        val query = searchText.text.trim()
+        val filtered = if (query.isNotEmpty()) {
+            dogList.filter {
+                it.name.contains(query, ignoreCase = true) || it.breed.contains(query, ignoreCase = true)
+            }
+        } else {
+            dogList
+        }
+        return filtered.sortedByDescending { it.isFavorite }
+    }
 
     val uiState: StateFlow<UiState> = dogsRepository
         .dogs
         .map<List<Dog>, UiState> { UiState.Success(data = it) }
         .catch { emit(UiState.Error(it)) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), UiState.Loading)
-
-    fun addDog(name: String) {
-        viewModelScope.launch {
-            dogsRepository.add(name)
-        }
-        this.name.value = ""
-    }
 
     fun removeDog(id: Int) {
         viewModelScope.launch {

@@ -24,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.compose.ui.platform.LocalContext
@@ -42,7 +43,7 @@ fun DogDetailsScreen(
     uiState: DogDetailsViewModel.UiState,
     retryAction: () -> Unit,
     navController: NavController,
-    onDeleteDog: (String) -> Unit
+    DogDetailsViewModel: DogDetailsViewModel
 ) {
     Scaffold(
         topBar = {
@@ -60,12 +61,13 @@ fun DogDetailsScreen(
                 },
                 actions = {
                     IconButton(onClick = {
-                        onDeleteDog(route.name)
+                        DogDetailsViewModel.removeDog(route.id)
                         navController.popBackStack()
                     }) {
                         Icon(
                             imageVector = Icons.Default.Delete,
-                            contentDescription = null
+                            contentDescription = null,
+                            tint = Color.Red
                         )
                     }
                 }
@@ -74,7 +76,7 @@ fun DogDetailsScreen(
     ) { inner ->
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(inner)){
 
-            ContentScreen(uiState, retryAction)
+            ContentScreen(uiState, retryAction,route = route)
             Text(
                 text = route.name,
                 fontSize = 16.sp,
@@ -82,12 +84,18 @@ fun DogDetailsScreen(
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
+            Text(
+                text = route.breed,
+                fontSize = 16.sp,
+                textAlign = TextAlign.Center,
+                color = Color.Gray
+            )
         }
     }
 }
 
 @Composable
-fun ContentScreen(uiState: DogDetailsViewModel.UiState, retryAction: () -> Unit, modifier: Modifier = Modifier) {
+fun ContentScreen(uiState: DogDetailsViewModel.UiState, retryAction: () -> Unit, modifier: Modifier = Modifier,route: DogDetailsScreen) {
     when(uiState) {
         is DogDetailsViewModel.UiState.Loading -> LoadingScreen(
             modifier = modifier
@@ -99,7 +107,8 @@ fun ContentScreen(uiState: DogDetailsViewModel.UiState, retryAction: () -> Unit,
             AsyncImage(
                 modifier = Modifier.fillMaxWidth().padding(32.dp).height(300.dp),
                 model = ImageRequest.Builder(context = LocalContext.current)
-                    .data(uiState.photo.message)
+                    .data(route.imageURL)
+                    //.size(720,980)
                     .crossfade(true)
                     .build(),
                 contentDescription = null

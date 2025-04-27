@@ -29,6 +29,16 @@ class DogCreateViewModel(
     init {
         getDogImage()
     }
+    fun addDog(name: String, breed: String) {
+        viewModelScope.launch {
+
+            val imageUrl = when (val state = uiState) {
+                is UiState.Success -> state.photo.message.replace("http://", "https://")
+                else -> ""
+            }
+            dogsPhotosRepository.add(name, breed, imageUrl)
+        }
+    }
 
     fun getDogImage() {
         viewModelScope.launch {

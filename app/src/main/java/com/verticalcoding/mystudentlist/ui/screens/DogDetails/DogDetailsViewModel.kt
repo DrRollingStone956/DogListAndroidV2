@@ -41,6 +41,11 @@ class DogDetailsViewModel(
             }
         }
     }
+    fun removeDog(id: Int) {
+        viewModelScope.launch {
+            dogsPhotosRepository.remove(id)
+        }
+    }
 
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {

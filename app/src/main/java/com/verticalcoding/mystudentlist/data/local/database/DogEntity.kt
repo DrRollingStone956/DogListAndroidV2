@@ -8,6 +8,8 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "dogs")
 data class DogEntity(
     val name: String,
+    val breed: String,
+    val imageURL: String,
 
     @ColumnInfo(defaultValue = "0")
     val isFav: Boolean

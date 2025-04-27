@@ -1,7 +1,9 @@
 package com.verticalcoding.mystudentlist.ui.screens.DogCreate
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -12,6 +14,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,6 +31,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -36,14 +42,14 @@ import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
-import com.verticalcoding.mystudentlist.ui.screens.DogsListViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DogCreateScreen(
     uiState: DogCreateViewModel.UiState,
     retryAction: () -> Unit,
-    navController: NavController
+    navController: NavController,
+    viewModel: DogCreateViewModel
 ) {
     var dogname by remember { mutableStateOf("") }
     var breed by remember { mutableStateOf("") }
@@ -65,24 +71,42 @@ fun DogCreateScreen(
             )
         }
     ) { inner ->
-        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(inner)){
+        Column(horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(inner)){
 
             ContentScreen(uiState, retryAction)
             OutlinedTextField(
                 value = dogname,
+                singleLine = true,
                 onValueChange = { dogname = it },
                 label = { Text("Imie") },
                 modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp).padding(horizontal = 32.dp)
             )
             OutlinedTextField(
                 value = breed,
+                singleLine = true,
                 label = { Text("Rasa") },
                 onValueChange = { breed = it },
                 modifier = Modifier.fillMaxWidth().padding(bottom = 40.dp).padding(horizontal = 32.dp)
             )
-            Button(onClick = { ;navController.popBackStack() }, modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp))
+            Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp).background(
+                Brush.linearGradient(
+                    colors = listOf(Color(0xff65558f), Color(0xf0eeb6e8)),
+                    start = Offset(0f, 0f),
+                    end = Offset.Infinite
+                ), shape = MaterialTheme.shapes.extraLarge
+            ))
             {
-                Text(text = "Add", fontSize = 20.sp, textAlign = TextAlign.Center)
+            Button(modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),onClick = {
+                if (dogname.isNotEmpty() && breed.isNotEmpty())
+                {
+                    viewModel.addDog(dogname, breed)
+                    navController.popBackStack() }
+                }
+            )
+            {
+                Text(text = "Add", fontSize = 20.sp, textAlign = TextAlign.Center, color = Color.White)
+            }
             }
         }
     }

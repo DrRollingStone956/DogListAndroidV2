@@ -6,10 +6,7 @@ import kotlinx.serialization.Serializable
 object DogList
 
 @Serializable
-data class DogDetailsScreen(val name: String)
+data class DogDetailsScreen(val name: String, val breed: String, val imageURL: String,val id: Int)
 
 @Serializable
-data class DogScreen(val name: String)
-
-@Serializable
-class DogCreate
+object DogCreate

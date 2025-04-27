@@ -1,6 +1,5 @@
 package com.verticalcoding.mystudentlist.data.local.database
 
-import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 
